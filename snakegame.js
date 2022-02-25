@@ -153,7 +153,7 @@ var createScene = function () {
                 lastt = Date.now();
             }
             
-            console.log('play');
+            //console.log('play');
             
             //if(Length_snake < 10)
             if(snake_list.length > Length_snake){
@@ -311,7 +311,7 @@ var createScene = function () {
                                 balls[j] = null;
                             }
                         }
-                        console.log(snake_list.length + ' ' + Length_snake);
+                        //console.log(snake_list.length + ' ' + Length_snake);
                     }
 
 
