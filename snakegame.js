@@ -15,29 +15,38 @@ var createScene = function () {
     var texture = new BABYLON.Texture("textures/albedo.png", scene);
     mat.diffuseTexture = texture;
 
+    const eqTexture = new BABYLON.EquiRectangularCubeTexture('textures/equirectangular.jpg', scene, 2);
+
+    const groundmat = new BABYLON.PBRMaterial("metalball", scene);
+    groundmat.reflectionTexture = eqTexture;
+    groundmat.refractionTexture = eqTexture;
+    groundmat.microSurface = 1.0;
+    groundmat.reflectivityColor = new BABYLON.Color3(0.05, 0.8, 0.86);
+    groundmat.albedoColor = new BABYLON.Color3(0.06, 0.64, 0.79);
+
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {height: 20.5, width: 20.5, subdivisions: 10});
     ground.position.y -= 0.5;
-    ground.material = mat;
+    ground.material = groundmat;
 
     const bord1 = BABYLON.MeshBuilder.CreateBox("box", {});
     bord1.position.z -= 10.5;
     bord1.scaling =  new BABYLON.Vector3(20, 1, 1)
-    bord1.material = mat;
+    bord1.material = groundmat;
 
     const bord2 = BABYLON.MeshBuilder.CreateBox("box", {});
     bord2.position.z += 10.5;
     bord2.scaling =  new BABYLON.Vector3(20, 1, 1)
-    bord2.material = mat;
+    bord2.material = groundmat;
 
     const bord3 = BABYLON.MeshBuilder.CreateBox("box", {});
     bord3.position.x -= 10.5;
     bord3.scaling =  new BABYLON.Vector3(1, 1, 22)
-    bord3.material = mat;
+    bord3.material = groundmat;
 
     const bord4 = BABYLON.MeshBuilder.CreateBox("box", {});
     bord4.position.x += 10.5;
     bord4.scaling =  new BABYLON.Vector3(1, 1, 22)
-    bord4.material = mat;
+    bord4.material = groundmat;
 
     const metal = new BABYLON.PBRMaterial("metal", scene);
         metal.reflectionTexture = texture;
@@ -54,14 +63,13 @@ var createScene = function () {
     //snake_list[0] = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 1, depth: 1});
     //snake_list[0].material = fireMaterial;
 
-    const eqTexture = new BABYLON.EquiRectangularCubeTexture('textures/equirectangular.jpg', scene, 2);
-
     const metalball = new BABYLON.PBRMaterial("metalball", scene);
     metalball.reflectionTexture = eqTexture;
-    metalball.refractionTexture = texture;
+    metalball.refractionTexture = eqTexture;
     metalball.microSurface = 1.0;
     metalball.reflectivityColor = new BABYLON.Color3(0.05, 0.8, 0.86);
     metalball.albedoColor = new BABYLON.Color3(0.06, 0.64, 0.79);
+    
     
     Nb_ball = 40;
     balls = [];
@@ -131,12 +139,14 @@ var createScene = function () {
     var hl = new BABYLON.HighlightLayer("hl1", scene);
     let Length_snake = 1;
     lastt = 0;
+    startt = Date.now();
     let game_play = true;
     score = 0;
     score_ball = 100;
     count_ball = 0;
     max_ball = 40;
     let win = 0;
+    restart = 1;
     /**************************************** */
 
     scene.registerBeforeRender(() => {
@@ -186,6 +196,10 @@ var createScene = function () {
                 snake_X = 0;
                 LR = 0;
                 HB = 1;
+                if(restart){
+                    startt = Date.now();
+                    restart = 0;
+                }
             }
             if (dsm.getDeviceSource(BABYLON.DeviceType.Keyboard).getInput(83) == 1) {
                 snake_Z = -snake_block;
@@ -251,18 +265,18 @@ var createScene = function () {
 
                     Length_snake = 1;
                     count_ball = 0;
-
+                    restart = 1;
                 }
             }
         }
 
     });
 
-    //ballMetal = null;
+   
     scene.registerAfterRender(()=>{
         
 
-        //for(var i = 0;i < snake_list.length;i++){
+        
         if(game_play){
             
             if(snake_list[snake_list.length-1] != null){
@@ -270,8 +284,8 @@ var createScene = function () {
                
                     if(balls[j] != null){
                         if (snake_list[snake_list.length-1].intersectsMesh(balls[j], false)) {
-                            for(var i = snake_list.length-1;i >= 0;i--)
-                                hl.addMesh(snake_list[i], BABYLON.Color3.Green());
+                            /*for(var i = snake_list.length-1;i >= 0;i--)
+                                hl.addMesh(snake_list[i], BABYLON.Color3.Green());*/
                         //ballMetal.setEnabled(false);
                             balls[j].dispose();
                             balls[j] = null;
@@ -283,16 +297,21 @@ var createScene = function () {
                                 game_play = false;
                                 advancedTexture.addControl(winText);
                                 win = 1;
+                                t = (Date.now()-startt);
+                                bonust = t > 50000 ? 50000 : t;
+                                console.log(t);
+                                score += Math.floor((50000-bonust)*30000/100000);
+                                controlsText.text = "Score : " + score;
 
                             }
                         //ballMetal.isVisible = false;
                             //scene.removeMesh(ballMetal);
                             
-                        }else {
+                        }/*else {
                             for(var i = 0;i < snake_list.length;i++)
                                 setTimeout(()=>{hl.removeMesh(snake_list[i]);},100);
                             
-                        }
+                        }*/
 
                     }
 
@@ -321,7 +340,7 @@ var createScene = function () {
         }
         
 
-        //}
+        
 
     });
 
